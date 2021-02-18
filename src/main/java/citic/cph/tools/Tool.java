@@ -1112,6 +1112,7 @@ public class Tool {
 	public static void main(String[] args) throws Exception {
 
 		String fileStr = getFileStr("E:\\MEI\\Desktop\\对接事项.docx");
+//		String fileStr = getFileStr("E:/MEI/Desktop/对接事项.docx");
 		System.out.println("fileStr ===" + fileStr);
 		System.out.println(generateFile(fileStr, "啊哈哈.docx").getName());
 		System.out.println(generateFile(fileStr, "啊哈哈.docx").getPath());
