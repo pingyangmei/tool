@@ -29,12 +29,12 @@ import java.util.Objects;
  */
 public class AESUtil {
 
-	public static final String SECRET_KEY = Tool.getUUID().substring(0, 16);//目前jdk版本只支持16位秘钥（32位的需添加jar包）前后端统一的秘钥
+	private static final String SECRET_KEY = Tool.getUUID().substring(0, 16);//目前jdk版本只支持16位秘钥（32位的需添加jar包）前后端统一的秘钥
 	private static final Logger log = LoggerFactory.getLogger(AESUtil.class);
 	private static String ivParameter = Objects.requireNonNull(MD5(SECRET_KEY)).substring(8, 24);//偏移量    前后端统一的偏移量// 加密
 
 	//加密
-	public static String encrypt(String content) {
+	private static String encrypt(String content) {
 		if (content == null || content.replaceAll(" ", "").equals("")) {
 			return "";
 		}
@@ -56,7 +56,7 @@ public class AESUtil {
 	}
 
 	// 解密
-	public static String decrypt(String content) {
+	private static String decrypt(String content) {
 		if (content == null || content.replaceAll(" ", "").equals("")) {
 			return "";
 		}
@@ -78,7 +78,7 @@ public class AESUtil {
 		}
 	}
 
-	public static String MD5(String s) {
+	private static String MD5(String s) {
 		char[] hexDigits = new char[]{'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
 
 		try {
@@ -89,11 +89,9 @@ public class AESUtil {
 			int j = md.length;
 			char[] str = new char[j * 2];
 			int k = 0;
-			byte[] var8 = md;
 			int var9 = md.length;
 
-			for (int var10 = 0; var10 < var9; ++var10) {
-				byte byte0 = var8[var10];
+			for (byte byte0 : md) {
 				str[k++] = hexDigits[byte0 >>> 4 & 15];
 				str[k++] = hexDigits[byte0 & 15];
 			}

@@ -13,9 +13,11 @@ import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.io.*;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.math.RoundingMode;
 import java.net.HttpURLConnection;
 import java.net.InetAddress;
 import java.net.URL;
@@ -48,18 +50,17 @@ import java.util.regex.Pattern;
 public class Tool {
 
 	public static final DateTimeFormatter DFYMD = DateTimeFormatter.ofPattern("yyyyMMdd");
-	public static final DateTimeFormatter DFY_M_D = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 	public static final DateTimeFormatter DFYMDHMS = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
+	public static final DateTimeFormatter DFY_M_D = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 	public static final DateTimeFormatter DFY_M_D_H_M_S = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 	private static final Logger log = LoggerFactory.getLogger(Tool.class);
 	private static final SimpleDateFormat SFYMD = new SimpleDateFormat("yyyyMMdd");
-	private static final SimpleDateFormat SFY_M_D = new SimpleDateFormat("yyyy-MM-dd");
 	private static final SimpleDateFormat SFYMDHMS = new SimpleDateFormat("yyyyMMddHHmmss");
 	private static final SimpleDateFormat SFYMDHMSS = new SimpleDateFormat("yyyyMMddHHmmssSSS");
+
+	private static final SimpleDateFormat SFY_M_D = new SimpleDateFormat("yyyy-MM-dd");
 	private static final SimpleDateFormat SFY_M_D_H_M_S = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
-
-	/*************************************FileUtil****************************/
 
 	public static String FILE_NAME_MID_STR = "*_*";
 	private static String localIp;
@@ -86,8 +87,6 @@ public class Tool {
 		return RemoteServer.getClientHost();
 	}
 
-	/********************************************************************日期时间相关*************************************************************************/
-
 	/**
 	 * 取本机Ip
 	 *
@@ -104,6 +103,8 @@ public class Tool {
 		}
 		return localIp;
 	}
+
+	/********************************************************************日期时间相关*************************************************************************/
 
 	/**
 	 * YMD转localdate
@@ -475,8 +476,12 @@ public class Tool {
 	 * @param bean bean
 	 * @param map  map
 	 */
-	public static void mapToObject(final Object bean, final Map<String, ?> map) throws Exception {
-		BeanUtils.populate(bean, map);
+	public static void mapToObject(final Object bean, final Map<String, ?> map) {
+		try {
+			BeanUtils.populate(bean, map);
+		} catch (IllegalAccessException | InvocationTargetException e) {
+			log.error("对象转换异常", e);
+		}
 	}
 
 	/**
@@ -527,6 +532,16 @@ public class Tool {
 
 	public static String getUUID() {
 		return UUID.randomUUID().toString().replace("-", "");
+	}
+
+	/* 处理字符串中的[\等字符串 */
+	public static String dealString(String args) {
+		return args.replaceAll("\\[", "").replaceAll("]", "").replaceAll("\\\\", "");
+	}
+
+	/* 处理 带率 字段 */
+	public static BigDecimal dealRateNum(String args) {
+		return Tool.getBigDecimal(args).divide(new BigDecimal(100), 5, RoundingMode.HALF_UP);
 	}
 
 	/**
@@ -674,8 +689,11 @@ public class Tool {
 		if (objectMapper == null) {
 			objectMapper = new ObjectMapper();
 		}
+		if (o == null) {
+			return null;
+		}
 		try {
-			return objectMapper.writeValueAsString(o);
+			return o instanceof String ? (String) o : objectMapper.writeValueAsString(o);
 		} catch (Exception e) {
 			log.error("对象转换异常", e);
 			return "";
@@ -932,9 +950,20 @@ public class Tool {
 	 *
 	 * @return
 	 */
-	public static byte[] file2byte(String filePath) throws IOException {
-		InputStream in = new BufferedInputStream(new FileInputStream(filePath));
-		return input2byte(in);
+	public static byte[] file2byte(String filePath) {
+		InputStream in = null;
+		try {
+			in = new BufferedInputStream(new FileInputStream(filePath));
+		} catch (FileNotFoundException e) {
+			log.error("FileNotFoundException", e);
+			throw new RuntimeException(e.getMessage());
+		}
+		try {
+			return input2byte(in);
+		} catch (IOException e) {
+			log.error("IOException", e);
+			throw new RuntimeException(e.getMessage());
+		}
 	}
 
 	/**
@@ -958,7 +987,7 @@ public class Tool {
 	/**
 	 * 将byte[]转为文件
 	 */
-	public static void byte2File(byte[] buf, String filePath, String fileName) {
+	public static File byte2File(byte[] buf, String filePath, String fileName) {
 		BufferedOutputStream bos = null;
 		FileOutputStream fos = null;
 		File file;
@@ -974,8 +1003,10 @@ public class Tool {
 			fos = new FileOutputStream(file);
 			bos = new BufferedOutputStream(fos);
 			bos.write(buf);
+			return file;
 		} catch (Exception e) {
 			log.error("异常!", e);
+			throw new RuntimeException("文件转换异常!");
 		} finally {
 			if (bos != null) {
 				try {
