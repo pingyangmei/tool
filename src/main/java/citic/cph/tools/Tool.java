@@ -700,6 +700,26 @@ public class Tool {
 		}
 	}
 
+	public static <T> T str2Opj(String o, Class<T> clazz) {
+		if (objectMapper == null) {
+			objectMapper = new ObjectMapper();
+		}
+		if (o == null) {
+			return null;
+		}
+		try {
+			return objectMapper.readValue(o, clazz);
+		} catch (Exception e) {
+			log.error("对象转换异常", e.getMessage());
+			return null;
+		}
+	}
+
+	/* OBJ转指定对象 */
+	public static <T> T opj2T(Object o, Class<T> clazz) {
+		return str2Opj(opj2Str(o), clazz);
+	}
+
 	/**
 	 * 排空处理
 	 */
@@ -1140,15 +1160,22 @@ public class Tool {
 		return patharray[0] + "///" + patharray[1] + "/";
 	}
 
-	public static void main(String[] args) throws Exception {
 
-		String fileStr = getFileStr("E:\\MEI\\Desktop\\对接事项.docx");
-//		String fileStr = getFileStr("E:/MEI/Desktop/对接事项.docx");
-		System.out.println("fileStr ===" + fileStr);
-		System.out.println(generateFile(fileStr, "啊哈哈.docx").getName());
-		System.out.println(generateFile(fileStr, "啊哈哈.docx").getPath());
-		System.out.println(generateFile(fileStr, "啊哈哈.docx").getAbsolutePath());
-		System.out.println(generateFile(fileStr, "啊哈哈.docx").getCanonicalPath());
-		System.out.println("end");
+	public static Boolean isEqual(List<Map<String, String>> list1, List<Map<String, String>> list2) {
+		if (list1.size() != list2.size()) {
+			return false;
+		}
+		for (Map<String, String> aList1 : list1) {
+			if (!list2.contains(aList1)) {
+				LogUtil.info("list2中没有{}", aList1);
+				return false;
+			}
+		}
+		return true;
+	}
+
+	public static void main(String[] args) {
+
+		System.out.println((3 + 1) / 2);
 	}
 }
