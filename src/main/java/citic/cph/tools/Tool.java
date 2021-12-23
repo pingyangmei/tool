@@ -31,8 +31,11 @@ import java.net.HttpURLConnection;
 import java.net.InetAddress;
 import java.net.URL;
 import java.net.UnknownHostException;
+import java.nio.MappedByteBuffer;
+import java.nio.channels.FileChannel;
 import java.rmi.server.RemoteServer;
 import java.rmi.server.ServerNotActiveException;
+import java.security.MessageDigest;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.text.ParseException;
@@ -55,22 +58,25 @@ import java.util.regex.Pattern;
  */
 public class Tool {
 
-	private static final Logger log = LoggerFactory.getLogger(Tool.class);
-
 	public static final DateTimeFormatter DFYMD = DateTimeFormatter.ofPattern("yyyyMMdd");
 	public static final DateTimeFormatter DFYMDHMS = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
 	public static final DateTimeFormatter DFYMDHMSS = DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS");
 	public static final DateTimeFormatter DFY_M_D = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 	public static final DateTimeFormatter DFY_M_D_H_M_S = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-
-
+	/**
+	 * hash类型
+	 */
+	public static final String HASH_TYPE_MD5 = "MD5";
+	public static final String HASH_TYPE_SHA1 = "SHA-1";
+	public static final String HASH_TYPE_SHA256 = "SHA-256";
+	public static final String HASH_TYPE_SHA384 = "SHA-384";
+	public static final String HASH_TYPE_SHA512 = "SHA-512";
+	private static final Logger log = LoggerFactory.getLogger(Tool.class);
 	private static final SimpleDateFormat SFYMD = new SimpleDateFormat("yyyyMMdd");
 	private static final SimpleDateFormat SFYMDHMS = new SimpleDateFormat("yyyyMMddHHmmss");
 	private static final SimpleDateFormat SFYMDHMSS = new SimpleDateFormat("yyyyMMddHHmmssSSS");
 	private static final SimpleDateFormat SFY_M_D = new SimpleDateFormat("yyyy-MM-dd");
 	private static final SimpleDateFormat SFY_M_D_H_M_S = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-
-
 	public static String FILE_NAME_MID_STR = "*_*";
 	private static String localIp;
 	private static ObjectMapper objectMapper = new ObjectMapper();
@@ -1043,18 +1049,14 @@ public class Tool {
 	 * 将byte[]转为文件
 	 */
 	public static File byte2File(byte[] buf, String filePath, String fileName) {
+		File dir = new File(filePath);
+		if (!dir.exists() && dir.isDirectory()) {
+			LogUtil.info("文件夹{}创建是否成功:{}", filePath, dir.mkdir());
+		}
 		BufferedOutputStream bos = null;
 		FileOutputStream fos = null;
-		File file;
+		File file = new File(filePath + File.separator + fileName);
 		try {
-			File dir = new File(filePath);
-			if (!dir.exists() && dir.isDirectory()) {
-				boolean ifMkSuccess = dir.mkdirs();
-				if (!ifMkSuccess) {
-					log.info("文件夹" + filePath + "创建失败!");
-				}
-			}
-			file = new File(filePath + File.separator + fileName);
 			fos = new FileOutputStream(file);
 			bos = new BufferedOutputStream(fos);
 			bos.write(buf);
@@ -1163,6 +1165,15 @@ public class Tool {
 		return file;
 	}
 
+	/**
+	 * 获取文件名称
+	 *
+	 * @param filePath
+	 * @return
+	 */
+	public static String getFileName(String filePath) {
+		return filePath.substring(filePath.lastIndexOf(File.separator) + 1);
+	}
 
 	public static String getEvnValue(String key) {
 		return System.getenv(key) == null ? "" : System.getenv(key);
@@ -1209,8 +1220,55 @@ public class Tool {
 		return true;
 	}
 
+	/**
+	 * 计算文件的Hash值
+	 *
+	 * @param file
+	 * @return hash：md5
+	 * @throws FileNotFoundException
+	 */
+	public static String getHashByFile(File file) {
+		return getHashByFile(file, HASH_TYPE_MD5);
+	}
+
+	/**
+	 * 计算文件的Hash值
+	 *
+	 * @param file
+	 * @param hashType
+	 * @return hash：hashType
+	 * @throws FileNotFoundException
+	 */
+	public static String getHashByFile(File file, String hashType) {
+		String value = null;
+		FileInputStream fis;
+		try {
+			fis = new FileInputStream(file);
+		} catch (FileNotFoundException e) {
+			throw new BizException(e.getMessage());
+		}
+		try {
+			MappedByteBuffer byteBuffer = fis.getChannel().map(FileChannel.MapMode.READ_ONLY, 0, file.length());
+			MessageDigest digest = MessageDigest.getInstance(hashType);
+			digest.update(byteBuffer);
+			BigInteger bigInteger = new BigInteger(1, digest.digest());
+			value = bigInteger.toString(16);
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				fis.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		return value;
+	}
+
 	public static void main(String[] args) {
 
-		System.out.println((3 + 1) / 2);
+		for (int i = 0; i < 1; i++) {
+			System.out.println(getUUID());
+		}
 	}
 }
