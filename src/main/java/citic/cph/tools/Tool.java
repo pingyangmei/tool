@@ -627,7 +627,7 @@ public class Tool {
 	 * @return double
 	 */
 	public static BigDecimal getBigDecimal(Object value) {
-		BigDecimal ret = null;
+		BigDecimal ret = BigDecimal.ZERO;
 		if (!isBlankOrNull(value) && !"null".equals(value)) {
 			if (value instanceof BigDecimal) {
 				ret = (BigDecimal) value;
@@ -1220,54 +1220,9 @@ public class Tool {
 		return true;
 	}
 
-	/**
-	 * 计算文件的Hash值
-	 *
-	 * @param file
-	 * @return hash：md5
-	 * @throws FileNotFoundException
-	 */
-	public static String getHashByFile(File file) {
-		return getHashByFile(file, HASH_TYPE_MD5);
-	}
-
-	/**
-	 * 计算文件的Hash值
-	 *
-	 * @param file
-	 * @param hashType
-	 * @return hash：hashType
-	 * @throws FileNotFoundException
-	 */
-	public static String getHashByFile(File file, String hashType) {
-		String value = null;
-		FileInputStream fis;
-		try {
-			fis = new FileInputStream(file);
-		} catch (FileNotFoundException e) {
-			throw new BizException(e.getMessage());
-		}
-		try {
-			MappedByteBuffer byteBuffer = fis.getChannel().map(FileChannel.MapMode.READ_ONLY, 0, file.length());
-			MessageDigest digest = MessageDigest.getInstance(hashType);
-			digest.update(byteBuffer);
-			BigInteger bigInteger = new BigInteger(1, digest.digest());
-			value = bigInteger.toString(16);
-		} catch (Exception e) {
-			e.printStackTrace();
-		} finally {
-			try {
-				fis.close();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
-		return value;
-	}
-
 	public static void main(String[] args) {
 
-		for (int i = 0; i < 1; i++) {
+		for (int i = 0; i < 10; i++) {
 			System.out.println(getUUID());
 		}
 	}
