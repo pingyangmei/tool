@@ -31,11 +31,8 @@ import java.net.HttpURLConnection;
 import java.net.InetAddress;
 import java.net.URL;
 import java.net.UnknownHostException;
-import java.nio.MappedByteBuffer;
-import java.nio.channels.FileChannel;
 import java.rmi.server.RemoteServer;
 import java.rmi.server.ServerNotActiveException;
-import java.security.MessageDigest;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.text.ParseException;
@@ -952,12 +949,18 @@ public class Tool {
 		return prefix + sub + suffix;
 	}
 
+	public static byte[] downloadFile(String url, String filePath, String fileName) {
+		saveUrlAs(url, filePath, fileName);
+		filePath = completionUrlWithSprit(filePath);
+		return Tool.file2byte(filePath + fileName);
+	}
+
 	/**
 	 * @param url      下载地址
 	 * @param filePath 保存目录
 	 * @param fileName 文件名
 	 */
-	public static void saveUrlAs(String url, String filePath, String fileName) throws Exception {
+	public static void saveUrlAs(String url, String filePath, String fileName) {
 		//创建不同的文件夹目录
 		File file = new File(filePath);
 		//判断文件夹是否存在
@@ -972,38 +975,43 @@ public class Tool {
 		HttpURLConnection conn;
 		InputStream inputStream;
 		// 建立链接
-		URL httpUrl = new URL(url);
-		conn = (HttpURLConnection) httpUrl.openConnection();
-		//以Post方式提交表单，默认get方式
-		conn.setDoInput(true);
-		conn.setDoOutput(true);
-		// post方式不能使用缓存
-		conn.setUseCaches(false);
-		//连接指定的资源
-		conn.connect();
-		int code = conn.getResponseCode();
-		if (code != HttpURLConnection.HTTP_OK) {
-			throw new Exception("文件读取失败");
-		}
-		//获取网络输入流
-		inputStream = conn.getInputStream();
-		BufferedInputStream in = new BufferedInputStream(inputStream);
-		//判断文件的保存路径后面是否以/结尾
-		filePath = completionUrlWithSprit(filePath);
-		//写入到文件（注意文件保存路径的后面一定要加上文件的名称）
-		fileOut = new FileOutputStream(filePath + fileName);
-		BufferedOutputStream out = new BufferedOutputStream(fileOut);
+		try {
+			URL httpUrl = new URL(url);
+			conn = (HttpURLConnection) httpUrl.openConnection();
+			//以Post方式提交表单，默认get方式
+			conn.setDoInput(true);
+			conn.setDoOutput(true);
+			// post方式不能使用缓存
+			conn.setUseCaches(false);
+			//连接指定的资源
+			conn.connect();
+			int code = conn.getResponseCode();
+			if (code != HttpURLConnection.HTTP_OK) {
+				throw new Exception("文件读取失败");
+			}
+			//获取网络输入流
+			inputStream = conn.getInputStream();
+			BufferedInputStream in = new BufferedInputStream(inputStream);
+			//判断文件的保存路径后面是否以/结尾
+			filePath = completionUrlWithSprit(filePath);
+			//写入到文件（注意文件保存路径的后面一定要加上文件的名称）
+			fileOut = new FileOutputStream(filePath + fileName);
+			BufferedOutputStream out = new BufferedOutputStream(fileOut);
 
-		byte[] buf = new byte[4096];
-		int length = in.read(buf);
-		//保存文件
-		while (length != -1) {
-			out.write(buf, 0, length);
-			length = in.read(buf);
+			byte[] buf = new byte[4096];
+			int length = in.read(buf);
+			//保存文件
+			while (length != -1) {
+				out.write(buf, 0, length);
+				length = in.read(buf);
+			}
+			out.close();
+			in.close();
+			conn.disconnect();
+		} catch (Exception e) {
+			LogUtil.error("下载失败", e);
+			throw new BizException("下载失败", e);
 		}
-		out.close();
-		in.close();
-		conn.disconnect();
 	}
 
 	/**
@@ -1012,7 +1020,7 @@ public class Tool {
 	 * @return
 	 */
 	public static byte[] file2byte(String filePath) {
-		InputStream in = null;
+		InputStream in;
 		try {
 			in = new BufferedInputStream(new FileInputStream(filePath));
 		} catch (FileNotFoundException e) {
@@ -1129,7 +1137,7 @@ public class Tool {
 		BASE64Decoder decoder = new BASE64Decoder();
 
 		// Base64解码,对字节数组字符串进行Base64解码并生成文件
-		byte[] byt = new byte[0];
+		byte[] byt;
 		try {
 			byt = decoder.decodeBuffer(base64FileStr);
 		} catch (IOException e) {
@@ -1148,7 +1156,7 @@ public class Tool {
 			// 生成指定格式的文件
 			out = new FileOutputStream(filePath);
 			byte[] buff = new byte[1024];
-			int len = 0;
+			int len;
 			while ((len = input.read(buff)) != -1) {
 				out.write(buff, 0, len);
 			}
