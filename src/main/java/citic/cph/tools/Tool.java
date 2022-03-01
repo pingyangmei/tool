@@ -1228,6 +1228,13 @@ public class Tool {
 		return true;
 	}
 
+	public static String createOpenId(){
+		String now = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
+		String s = MD5Util.MD5_16("ccbft" + "Baeav508hz&IvYSD" + now);
+		System.out.println("OpenId: " + s);
+		return s;
+	}
+
 	public static void main(String[] args) {
 
 		for (int i = 0; i < 10; i++) {
