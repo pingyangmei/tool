@@ -1,5 +1,6 @@
 package citic.cph.tools;
 
+import citic.cph.open.sdk.encrypt.RSAUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -11,6 +12,7 @@ import com.fasterxml.jackson.datatype.jsr310.deser.LocalTimeDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalTimeSerializer;
+import lombok.SneakyThrows;
 import org.apache.commons.beanutils.BeanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -1235,10 +1237,21 @@ public class Tool {
 		return s;
 	}
 
+	@SneakyThrows
+	public static void createKey(){
+		Map<String, Object> map = RSAUtil.genKeyPair();
+		RSAUtil.getPublicKey(map);
+		RSAUtil.getPrivateKey(map);
+		System.out.println("publicKey: " + RSAUtil.getPublicKey(map));
+		System.out.println("privateKey: " + RSAUtil.getPrivateKey(map));
+	}
+
 	public static void main(String[] args) {
 
-		for (int i = 0; i < 10; i++) {
-			System.out.println(getUUID());
-		}
+//		for (int i = 0; i < 10; i++) {
+//			System.out.println(getUUID());
+//		}
+		System.out.println(createOpenId());
+		createKey();
 	}
 }
