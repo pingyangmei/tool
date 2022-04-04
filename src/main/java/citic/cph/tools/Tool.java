@@ -1,6 +1,7 @@
 package citic.cph.tools;
 
 import com.alibaba.fastjson.JSONObject;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -41,6 +42,7 @@ import java.text.SimpleDateFormat;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.time.temporal.TemporalAdjusters;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -55,6 +57,7 @@ import java.util.regex.Pattern;
  * MEI          2020/5/8       创建
  */
 public class Tool {
+
 
 	public static final DateTimeFormatter DFYMD = DateTimeFormatter.ofPattern("yyyyMMdd");
 	public static final DateTimeFormatter DFYMDHMS = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
@@ -143,8 +146,6 @@ public class Tool {
 		return localIp;
 	}
 
-	/********************************************************************日期时间相关*************************************************************************/
-
 	/**
 	 * YMD转localdate
 	 *
@@ -180,6 +181,8 @@ public class Tool {
 		}
 		return LocalDate.of(0, 1, 1);
 	}
+
+	/********************************************************************日期时间相关*************************************************************************/
 
 	/**
 	 * YMDHMS转localdateTime
@@ -237,6 +240,99 @@ public class Tool {
 		Instant instant = date.toInstant();
 		ZoneId zoneId = ZoneId.systemDefault();
 		return instant.atZone(zoneId).toLocalDate();
+	}
+
+	/**
+	 * 获取当月最后一天
+	 *
+	 * @return
+	 */
+	public static LocalDate getLastDateOfMonth() {
+		return LocalDate.now().with(TemporalAdjusters.lastDayOfMonth());
+	}
+
+	/**
+	 * 获取当年某月最后一天
+	 *
+	 * @return
+	 */
+	public static LocalDate getLastDateOfMonth(Integer monthValue) {
+		LocalDate firstDayOfThisMonth = LocalDate.of(LocalDate.now().getYear(), monthValue, 1);
+		return firstDayOfThisMonth.with(TemporalAdjusters.lastDayOfMonth());
+	}
+
+	/**
+	 * 获取某年某月最后一天
+	 *
+	 * @return
+	 */
+	public static LocalDate getLastDateOfMonth(Integer yearValue, Integer monthValue) {
+		LocalDate firstDayOfThisMonthOfThisYear = LocalDate.of(yearValue, monthValue, 1);
+		return firstDayOfThisMonthOfThisYear.with(TemporalAdjusters.lastDayOfMonth());
+	}
+
+	/**
+	 * 获取当前对应季度最后一天
+	 *
+	 * @return
+	 */
+	public static LocalDate getLastDateOfQuarter() {
+		LocalDate now = LocalDate.now();
+		return getLastDateOfQuarter(now.getYear(), now.getMonthValue());
+	}
+
+	/**
+	 * 获取当年某月对应季度最后一天
+	 *
+	 * @return
+	 */
+	public static LocalDate getLastDateOfQuarter(Integer monthValue) {
+		LocalDate now = LocalDate.now();
+		return getLastDateOfQuarter(now.getYear(), monthValue);
+	}
+
+	/**
+	 * 获取某年某月对应季度最后一天
+	 *
+	 * @return
+	 */
+	public static LocalDate getLastDateOfQuarter(Integer yearValue, Integer monthValue) {
+		if (monthValue == 1
+				|| monthValue == 2
+				|| monthValue == 3
+				) {
+			return LocalDate.of(yearValue, Month.MARCH, 31);
+		} else if (monthValue == 4
+				|| monthValue == 5
+				|| monthValue == 6) {
+			return LocalDate.of(yearValue, Month.JUNE, 30);
+		} else if (monthValue == 7
+				|| monthValue == 8
+				|| monthValue == 9) {
+			return LocalDate.of(yearValue, Month.SEPTEMBER, 30);
+		} else {
+			return LocalDate.of(yearValue, Month.NOVEMBER, 31);
+		}
+	}
+
+
+	/**
+	 * 获取当年最后一天
+	 *
+	 * @return
+	 */
+	public static LocalDate getLastDateOfYear() {
+		return LocalDate.now().with(TemporalAdjusters.lastDayOfYear());
+	}
+
+	/**
+	 * 获取某年最后一天
+	 *
+	 * @return
+	 */
+	public static LocalDate getLastDateOfYear(Integer yearValue) {
+		LocalDate firstDayOfThisYear = LocalDate.of(yearValue, 1, 1);
+		return firstDayOfThisYear.with(TemporalAdjusters.lastDayOfYear());
 	}
 
 	/**
@@ -483,8 +579,6 @@ public class Tool {
 		return cal.getTime();
 	}
 
-	/******************************************************************日期时间相关**************************************************************************/
-
 	/**
 	 * 对于给定的日期表达式，返回指定数目的天数以前或以后的日期。
 	 *
@@ -508,6 +602,8 @@ public class Tool {
 		JSONObject json = JSONObject.parseObject(jsonStr);
 		return json.get(name);
 	}
+
+	/******************************************************************日期时间相关**************************************************************************/
 
 	/**
 	 * map转对象
@@ -606,8 +702,6 @@ public class Tool {
 		return m.matches();
 	}
 
-	/****************************************************************对象转数字*****************************************************/
-
 	/**
 	 * 香港手机号码8位数，5|6|8|9开头+7位任意数
 	 */
@@ -641,6 +735,8 @@ public class Tool {
 		}
 		return ret;
 	}
+
+	/****************************************************************对象转数字*****************************************************/
 
 	/**
 	 * object 转 Integer
@@ -739,6 +835,14 @@ public class Tool {
 		}
 	}
 
+	/**
+	 * 转对象
+	 *
+	 * @param o
+	 * @param clazz
+	 * @param <T>
+	 * @return
+	 */
 	public static <T> T str2Opj(String o, Class<T> clazz) {
 		if (objectMapper == null) {
 			objectMapper = new ObjectMapper();
@@ -748,6 +852,29 @@ public class Tool {
 		}
 		try {
 			return objectMapper.readValue(o, clazz);
+		} catch (Exception e) {
+			log.error("对象转换异常", e.getMessage());
+			return null;
+		}
+	}
+
+	/**
+	 * 转list
+	 *
+	 * @param o
+	 * @param valueTypeRef
+	 * @param <T>
+	 * @return
+	 */
+	public static <T> T str2Opj(String o, TypeReference<T> valueTypeRef) {
+		if (objectMapper == null) {
+			objectMapper = new ObjectMapper();
+		}
+		if (o == null) {
+			return null;
+		}
+		try {
+			return objectMapper.readValue(o, valueTypeRef);
 		} catch (Exception e) {
 			log.error("对象转换异常", e.getMessage());
 			return null;
@@ -764,6 +891,21 @@ public class Tool {
 	 */
 	public static String excludeNull(Object obj) {
 		return (obj == null ? "" : obj).toString().trim();
+	}
+
+	/**
+	 * 获取列表最后一个元素
+	 *
+	 * @param list
+	 * @param <E>
+	 * @return
+	 */
+	public static <E> E getLastElement(List<E> list) {
+		if ((list != null) && (!list.isEmpty())) {
+			int lastIdx = list.size() - 1;
+			return list.get(lastIdx);
+		} else
+			return null;
 	}
 
 	/**
@@ -1215,7 +1357,6 @@ public class Tool {
 		return patharray[0] + "///" + patharray[1] + "/";
 	}
 
-
 	public static Boolean isEqual(List<Map<String, String>> list1, List<Map<String, String>> list2) {
 		if (list1.size() != list2.size()) {
 			return false;
@@ -1229,7 +1370,7 @@ public class Tool {
 		return true;
 	}
 
-	public static String createOpenId(){
+	public static String createOpenId() {
 		String now = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
 		String s = MD5Util.MD5_16("ccbft" + "Baeav508hz&IvYSD" + now);
 		System.out.println("OpenId: " + s);
@@ -1237,7 +1378,7 @@ public class Tool {
 	}
 
 	@SneakyThrows
-	public static void createKey(){
+	public static void createKey() {
 		Map<String, Object> map = RSAUtil.genKeyPair();
 		RSAUtil.getPublicKey(map);
 		RSAUtil.getPrivateKey(map);
@@ -1250,7 +1391,21 @@ public class Tool {
 //		for (int i = 0; i < 10; i++) {
 //			System.out.println(getUUID());
 //		}
-		System.out.println(createOpenId());
-		createKey();
+		System.out.println(getLastDateOfMonth());
+		System.out.println(getLastDateOfMonth(3));
+		System.out.println(getLastDateOfMonth(2200, 2));
+		System.out.println(getLastDateOfQuarter());
+		System.out.println(getLastDateOfQuarter(7));
+		System.out.println(getLastDateOfQuarter(2389, 8));
+		System.out.println(getLastDateOfYear());
+		System.out.println(getLastDateOfYear(2064));
 	}
+
+	/* 特殊split分割字符*/
+	public static final class SplitChar {
+		public static final String 点 = "\\.";
+		public static final String 竖 = "\\|";
+		public static final String 星 = "\\*";
+	}
+
 }
