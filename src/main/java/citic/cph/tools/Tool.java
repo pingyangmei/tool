@@ -417,6 +417,31 @@ public class Tool {
     }
 
     /**
+     * 格式化输出时间
+     *
+     * @return 输出格式如：HHmmss
+     */
+    public static String dateToStrHMS(Date date) {
+        if (date == null) {
+            return "";
+        }
+        return SFHMS.format(date);
+    }
+
+    /**
+     * 格式化输出时间
+     *
+     * @return 输出格式如：HH:mm:ss
+     */
+    public static String dateToStr_HMS(Date date) {
+        if (date == null) {
+            return "";
+        }
+        return SFH_M_S.format(date);
+    }
+
+
+    /**
      * ymd转date
      *
      * @param ymd 年月日
