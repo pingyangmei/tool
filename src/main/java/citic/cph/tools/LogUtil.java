@@ -20,10 +20,10 @@ import java.util.Objects;
 @Slf4j
 public class LogUtil {
 
-	private static final String DebugLogPix = " DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD ";
-	private static final String InfoLogPix = " >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> ";
-	private static final String WarnLogPix = " !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ";
-	private static final String ErrorLogPix = " ×××××××××××××××××××××××××××××××× ";
+	private static final String DebugLogPix = " DDDDDDDDDDDDDDDDD ";
+	private static final String InfoLogPix = " >>>>>>>>>>>>>>>>>> ";
+	private static final String WarnLogPix = " !!!!!!!!!!!!!!!!!! ";
+	private static final String ErrorLogPix = " ××××××××××××××××× ";
 
 	@Resource
 	private static ObjectMapper objectMapper;
