@@ -310,7 +310,7 @@ public class Tool {
         if (monthValue == 1
                 || monthValue == 2
                 || monthValue == 3
-                ) {
+        ) {
             return LocalDate.of(yearValue, Month.MARCH, 31);
         } else if (monthValue == 4
                 || monthValue == 5
@@ -534,6 +534,13 @@ public class Tool {
         cal.setTime(date);
         cal.set(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DATE), 23, 59, 59);
         return cal.getTime();
+    }
+
+    /**
+     * 取参数日期的最晚时间
+     */
+    public static LocalDateTime getLastTime(LocalDate date) {
+        return date.atTime(23, 59, 59);
     }
 
     /**
