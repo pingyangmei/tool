@@ -945,6 +945,11 @@ public class Tool {
         return str2Opj(opj2Str(o), clazz);
     }
 
+    /* OBJ转指定对象 */
+    public static <T> T opj2T(Object o, TypeReference<T> valueTypeRef) {
+        return str2Opj(opj2Str(o), valueTypeRef);
+    }
+
     /**
      * 排空处理
      */
