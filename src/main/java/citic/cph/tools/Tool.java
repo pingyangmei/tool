@@ -1435,7 +1435,6 @@ public class Tool {
         System.out.println("OpenId: " + s);
         return s;
     }
-
     @SneakyThrows
     public static void createKey() {
         Map<String, Object> map = RSAUtil.genKeyPair();
@@ -1445,12 +1444,27 @@ public class Tool {
         System.out.println("privateKey: " + RSAUtil.getPrivateKey(map));
     }
 
+    @SneakyThrows
+    public static Map<String, String> getTemplateArgs(Object object) {
+        Map<String, String> taMap = new HashMap<>();
+        for (Field field : object.getClass().getDeclaredFields()) {
+            field.setAccessible(true);
+            String key = field.getName();
+            String value = Tool.opj2Str(field.get(object));
+            if (Tool.isBlankOrNull(value)) {
+                continue;
+            }
+            taMap.put(key, value);
+        }
+        LogUtil.info("消息参数:{}", Tool.opj2Str(taMap));
+        return taMap;
+    }
     public static void main(String[] args) {
 
-//		for (int i = 0; i < 10; i++) {
-//			System.out.println(getUUID());
-//		}
-        System.out.println(getMonthStr(LocalDate.now().getMonthValue()));
+		for (int i = 0; i < 10; i++) {
+			System.out.println(getUUID());
+		}
+//        System.out.println(getMonthStr(LocalDate.now().getMonthValue()));
     }
 
     /* 特殊split分割字符*/
