@@ -969,16 +969,6 @@ public class Tool {
         }
     }
 
-    /* OBJ转指定对象 */
-    public static <T> T opj2T(Object o, Class<T> clazz) {
-        return str2Opj(opj2Str(o), clazz);
-    }
-
-    /* OBJ转指定对象 */
-    public static <T> T opj2T(Object o, TypeReference<T> valueTypeRef) {
-        return str2Opj(opj2Str(o), valueTypeRef);
-    }
-
     /**
      * 排空处理
      */
@@ -1499,9 +1489,9 @@ public class Tool {
 
     public static void main(String[] args) {
 
-		for (int i = 0; i < 10; i++) {
-			System.out.println(getUUID());
-		}
+        for (int i = 0; i < 10; i++) {
+            System.out.println(getUUID());
+        }
 //        System.out.println(getMonthStr(LocalDate.now().getMonthValue()));
     }
 
