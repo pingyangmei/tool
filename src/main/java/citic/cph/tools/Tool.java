@@ -88,7 +88,7 @@ public class Tool {
     private final static String[] MONTH_STR = {"一月", "二月", "三月", "四月", "五月", "六月", "七月", "八月", "九月", "十月", "十一月", "十二月"};
     public static String FILE_NAME_MID_STR = "*_*";
     private static String localIp;
-    private static ObjectMapper objectMapper = new ObjectMapper();
+    public static ObjectMapper objectMapper = new ObjectMapper();
 
     static {
         // 转换为格式化的json
