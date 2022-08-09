@@ -31,6 +31,8 @@ import java.net.HttpURLConnection;
 import java.net.InetAddress;
 import java.net.URL;
 import java.net.UnknownHostException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.rmi.server.RemoteServer;
 import java.rmi.server.ServerNotActiveException;
 import java.text.DecimalFormat;
@@ -157,7 +159,7 @@ public class Tool {
     }
 
     /**
-     * YMD转localdate
+     * YMD转localDate
      *
      * @param dateStr 年月日
      * @return LocalDate
@@ -175,7 +177,7 @@ public class Tool {
     }
 
     /**
-     * Y_M_D转localdate
+     * Y_M_D转localDate
      *
      * @param dateStr 年-月-日
      * @return LocalDate
@@ -192,10 +194,8 @@ public class Tool {
         return LocalDate.of(0, 1, 1);
     }
 
-    /********************************************************************日期时间相关*************************************************************************/
-
     /**
-     * YMDHMS转localdateTime
+     * YMDHMS转localDateTime
      *
      * @param dateStr 年月日时分秒
      * @return LocalDateTime
@@ -212,7 +212,7 @@ public class Tool {
     }
 
     /**
-     * Y_M_D_H_M_S转localdateTime
+     * Y_M_D_H_M_S转localDateTime
      *
      * @param dateStr 年-月-日 时:分:秒
      * @return LocalDateTime
@@ -563,6 +563,15 @@ public class Tool {
         return cal.getTime();
     }
 
+    /**
+     * 某时间是否在两个时间之间
+     *
+     * @param currentTime
+     * @param startTime
+     * @param endTime
+     * @return
+     * @throws Exception
+     */
     public static boolean isBetween2Times(Date currentTime, String startTime, String endTime) throws Exception {
         String dateString = new SimpleDateFormat("yyyy-MM-dd").format(currentTime);
         startTime = dateString + " " + startTime;
@@ -639,13 +648,25 @@ public class Tool {
      * @param jsonStr jsonStr
      * @param name    name
      * @return Object
+     * @deprecated {@link #getFieldFromJson(String, String)}
      */
+    @Deprecated
     public static Object getFeidFromJson(String jsonStr, String name) {// jsonStr:要转换的json字符串,name：需要的字段名称
         JSONObject json = JSONObject.parseObject(jsonStr);
         return json.get(name);
     }
 
-    /******************************************************************日期时间相关**************************************************************************/
+    /**
+     * 获取json字符串中指定key的对象;
+     *
+     * @param jsonStr jsonStr
+     * @param name    name
+     * @return Object
+     */
+    public static Object getFieldFromJson(String jsonStr, String name) {// jsonStr:要转换的json字符串,name：需要的字段名称
+        JSONObject json = JSONObject.parseObject(jsonStr);
+        return json.get(name);
+    }
 
     /**
      * map转对象
@@ -685,7 +706,7 @@ public class Tool {
             Object value = getter != null ? getter.invoke(obj) : null;
             map.put(key, String.valueOf(value));
         }
-        LogUtil.debug("将对象转为map集合,map=" + map);
+        LogUtil.debug("将对象转为map集合, map ：{}", opj2Str(map));
         return map;
     }
 
@@ -748,7 +769,7 @@ public class Tool {
      * 香港手机号码8位数，5|6|8|9开头+7位任意数
      */
     private static boolean isHKPhoneLegal(String str) {
-        String regExp = "^(5|6|8|9)\\d{7}$";
+        String regExp = "^([5689])\\d{7}$";
         Pattern p = Pattern.compile(regExp);
         Matcher m = p.matcher(str);
         return m.matches();
@@ -770,15 +791,13 @@ public class Tool {
             } else if (value instanceof BigInteger) {
                 ret = new BigDecimal((BigInteger) value);
             } else if (value instanceof Number) {
-                ret = new BigDecimal(((Number) value).doubleValue());
+                ret = BigDecimal.valueOf(((Number) value).doubleValue());
             } else {
                 throw new ClassCastException("Not possible to coerce [" + value + "] from class " + value.getClass() + " into a BigDecimal.");
             }
         }
         return ret;
     }
-
-    /****************************************************************对象转数字*****************************************************/
 
     /**
      * object 转 Integer
@@ -847,7 +866,7 @@ public class Tool {
         }
         int count = as.split("\\.")[1].length();
         if (count > scale) {
-            return amount.setScale(scale, BigDecimal.ROUND_HALF_UP);
+            return amount.setScale(scale, RoundingMode.HALF_UP);
         } else {
             StringBuilder formatStr = new StringBuilder("0.");
             for (int i = 0; i < scale; i++) {
@@ -892,6 +911,16 @@ public class Tool {
         }
     }
 
+    /* OBJ转指定对象 */
+    public static <T> T opj2T(Object o, Class<T> clazz) {
+        return str2Opj(opj2Str(o), clazz);
+    }
+
+    /* OBJ转指定对象 */
+    public static <T> T opj2T(Object o, TypeReference<T> valueTypeRef) {
+        return str2Opj(opj2Str(o), valueTypeRef);
+    }
+
     /**
      * 转对象
      *
@@ -910,7 +939,8 @@ public class Tool {
         try {
             return objectMapper.readValue(o, clazz);
         } catch (Exception e) {
-            LogUtil.error("对象转换异常", e.getMessage());
+            StackTraceElement stackTraceElement = Thread.currentThread().getStackTrace()[2];
+            LogUtil.error("类:{}, 行数:{}, 对象转换异常", stackTraceElement.getClassName(), stackTraceElement.getLineNumber(), e);
             return null;
         }
     }
@@ -934,15 +964,9 @@ public class Tool {
             return objectMapper.readValue(o, valueTypeRef);
         } catch (Exception e) {
             StackTraceElement stackTraceElement = Thread.currentThread().getStackTrace()[2];
-            LogUtil.error("对象转换异常:{}, 文件:{}, 行数:{}", e.getMessage(), stackTraceElement.getClassName(), stackTraceElement.getLineNumber());
-            LogUtil.error("文件:{}, 行数:{}, 对象转换异常:{}, ", stackTraceElement.getClassName(), stackTraceElement.getLineNumber(), e.getMessage());
+            LogUtil.error("类:{}, 行数:{}, 对象转换异常", stackTraceElement.getClassName(), stackTraceElement.getLineNumber(), e);
             return null;
         }
-    }
-
-    /* OBJ转指定对象 */
-    public static <T> T opj2T(Object o, Class<T> clazz) {
-        return str2Opj(opj2Str(o), clazz);
     }
 
     /**
@@ -1031,9 +1055,9 @@ public class Tool {
      */
     private static String formatToMoney(double money) {
         Locale.setDefault(Locale.CHINA);
-        NumberFormat numberFormate;
-        numberFormate = NumberFormat.getCurrencyInstance();
-        return numberFormate.format(money);
+        NumberFormat numberFormat;
+        numberFormat = NumberFormat.getCurrencyInstance();
+        return numberFormat.format(money);
     }
 
     /**
@@ -1301,7 +1325,7 @@ public class Tool {
         byte[] data = null;
         // 读取文件字节数组
         try {
-            in = new FileInputStream(filePath);
+            in = Files.newInputStream(Paths.get(filePath));
             data = new byte[in.available()];
             in.read(data);
             in.close();
@@ -1309,6 +1333,7 @@ public class Tool {
             e.printStackTrace();
         } finally {
             try {
+                assert in != null;
                 in.close();
             } catch (IOException e) {
                 e.printStackTrace();
@@ -1356,7 +1381,7 @@ public class Tool {
         InputStream input = new ByteArrayInputStream(byt);
         try {
             // 生成指定格式的文件
-            out = new FileOutputStream(filePath);
+            out = Files.newOutputStream(Paths.get(filePath));
             byte[] buff = new byte[1024];
             int len;
             while ((len = input.read(buff)) != -1) {
@@ -1366,6 +1391,7 @@ public class Tool {
             LogUtil.error("流转文件失败", e);
         } finally {
             try {
+                assert out != null;
                 out.flush();
                 out.close();
             } catch (IOException e) {
@@ -1400,20 +1426,20 @@ public class Tool {
      */
     public static String getNextSeq(String oldNo, int preCount, int suffix) {
         StringBuilder newNo = new StringBuilder(oldNo.substring(0, preCount));
-        int seq = Integer.valueOf(oldNo.substring(preCount, oldNo.length()));
+        int seq = Integer.parseInt(oldNo.substring(preCount, oldNo.length()));
         int newSeq = seq + 1;
         int count0 = suffix - (String.valueOf(newSeq).length());
         for (int i = 0; i < count0; i++) {
             newNo.append("0");
         }
-        newNo.append(String.valueOf(newSeq));
+        newNo.append(newSeq);
         return newNo.toString();
     }
 
     public static String getRootPath() {
-        String path = Tool.class.getResource("/").toString();
-        String[] patharray = path.split("/");
-        return patharray[0] + "///" + patharray[1] + "/";
+        String path = Objects.requireNonNull(Tool.class.getResource("/")).toString();
+        String[] pathArray = path.split("/");
+        return pathArray[0] + "///" + pathArray[1] + "/";
     }
 
     public static Boolean isEqual(List<Map<String, String>> list1, List<Map<String, String>> list2) {
@@ -1435,6 +1461,7 @@ public class Tool {
         System.out.println("OpenId: " + s);
         return s;
     }
+
     @SneakyThrows
     public static void createKey() {
         Map<String, Object> map = RSAUtil.genKeyPair();
@@ -1459,11 +1486,12 @@ public class Tool {
         LogUtil.info("消息参数:{}", Tool.opj2Str(taMap));
         return taMap;
     }
+
     public static void main(String[] args) {
 
-		for (int i = 0; i < 10; i++) {
-			System.out.println(getUUID());
-		}
+        for (int i = 0; i < 10; i++) {
+            System.out.println(getUUID());
+        }
 //        System.out.println(getMonthStr(LocalDate.now().getMonthValue()));
     }
 
