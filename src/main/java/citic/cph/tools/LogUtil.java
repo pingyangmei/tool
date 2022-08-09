@@ -1,7 +1,6 @@
 package citic.cph.tools;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
@@ -59,9 +58,6 @@ public class LogUtil {
 
     @SneakyThrows
     public static <T> T logout(String SERVICE_NAME, Object response, Class<T> clazz) {
-        if (Tool.objectMapper == null) {
-            Tool.objectMapper = new ObjectMapper();
-        }
         LogUtil.info2(SERVICE_NAME + "调用:{}, 出参:{}", Thread.currentThread().getStackTrace()[2].getMethodName(), Tool.opj2Str(response));
         return Tool.objectMapper.readValue(Objects.requireNonNull(Tool.opj2Str(response)), clazz);
     }
@@ -77,9 +73,6 @@ public class LogUtil {
      */
     @SneakyThrows
     public static <T> T logoutList(String SERVICE_NAME, Object response, TypeReference<T> valueTypeRef) {
-        if (Tool.objectMapper == null) {
-            Tool.objectMapper = new ObjectMapper();
-        }
         LogUtil.info2(SERVICE_NAME + "调用:{}, 出参:{}", Thread.currentThread().getStackTrace()[2].getMethodName(), Tool.opj2Str(response));
         return Tool.objectMapper.readValue(Objects.requireNonNull(Tool.opj2Str(response)), valueTypeRef);
     }
