@@ -1,6 +1,8 @@
 package citic.cph.tools;
 
 import com.alibaba.fastjson.JSONObject;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.json.JsonReadFeature;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -14,6 +16,7 @@ import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalTimeSerializer;
 import lombok.SneakyThrows;
 import org.apache.commons.beanutils.BeanUtils;
+import org.apache.commons.collections.map.LinkedMap;
 import sun.misc.BASE64Decoder;
 import sun.misc.BASE64Encoder;
 
@@ -101,6 +104,8 @@ public class Tool {
         objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
         objectMapper.disable(DeserializationFeature.ADJUST_DATES_TO_CONTEXT_TIME_ZONE);
         objectMapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+        objectMapper.configure(JsonReadFeature.ALLOW_UNESCAPED_CONTROL_CHARS.mappedFeature(), true);
+
         JavaTimeModule javaTimeModule = new JavaTimeModule();
 
         //日期序列化
@@ -1472,8 +1477,8 @@ public class Tool {
     }
 
     @SneakyThrows
-    public static Map<String, String> getTemplateArgs(Object object) {
-        Map<String, String> taMap = new HashMap<>();
+    public static LinkedMap getTemplateArgs(Object object) {
+        LinkedMap taMap = new LinkedMap();
         for (Field field : object.getClass().getDeclaredFields()) {
             field.setAccessible(true);
             String key = field.getName();

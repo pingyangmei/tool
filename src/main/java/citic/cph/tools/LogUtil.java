@@ -23,7 +23,7 @@ public class LogUtil {
     private static final String WarnLogPix = " !!!!!!!!!!!!!!!!!! ";
     private static final String ErrorLogPix = " ××××××××××××××××× ";
 
-    static void debug(String format, Object... arguments) {
+    public static void debug(String format, Object... arguments) {
         StackTraceElement stackTraceElement = Thread.currentThread().getStackTrace()[2];
         log.debug(DebugLogPix + stackTraceElement.getFileName() + " " + stackTraceElement.getLineNumber() + " 行 " + format, arguments);
     }
