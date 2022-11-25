@@ -1,7 +1,6 @@
 package citic.cph.tools;
 
 import com.alibaba.fastjson.JSONObject;
-import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.json.JsonReadFeature;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -1093,6 +1092,18 @@ public class Tool {
             url = url + "/";
         }
         return url;
+    }
+
+    /**
+     * @param arg1
+     * @param XXX
+     * @return
+     */
+    public static String endsWXXX(String arg1, String XXX) {
+        if (!arg1.endsWith(XXX)) {
+            return arg1 + XXX;
+        }
+        return arg1;
     }
 
     /**
