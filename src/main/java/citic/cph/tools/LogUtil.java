@@ -25,7 +25,7 @@ public class LogUtil {
 
     public static void debug(String format, Object... arguments) {
         StackTraceElement stackTraceElement = Thread.currentThread().getStackTrace()[2];
-        if (stackTraceElement.getClassName().equals("GlobalExceptionHandler")){
+        if (stackTraceElement.getClassName().equals("GlobalExceptionHandler")) {
             stackTraceElement = Thread.currentThread().getStackTrace()[3];
         }
         log.debug(DebugLogPix + stackTraceElement.getFileName() + " " + stackTraceElement.getLineNumber() + " 行 " + format, arguments);
@@ -33,15 +33,12 @@ public class LogUtil {
 
     public static void info(String format, Object... arguments) {
         StackTraceElement stackTraceElement = Thread.currentThread().getStackTrace()[2];
-        if (stackTraceElement.getClassName().equals("GlobalExceptionHandler")){
-            stackTraceElement = Thread.currentThread().getStackTrace()[3];
-        }
         log.info(InfoLogPix + stackTraceElement.getFileName() + " " + stackTraceElement.getLineNumber() + " 行 " + format, arguments);
     }
 
     public static void warn(String format, Object... arguments) {
         StackTraceElement stackTraceElement = Thread.currentThread().getStackTrace()[2];
-        if (stackTraceElement.getClassName().equals("GlobalExceptionHandler")){
+        if (stackTraceElement.getClassName().equals("GlobalExceptionHandler")) {
             stackTraceElement = Thread.currentThread().getStackTrace()[3];
         }
         log.warn(WarnLogPix + stackTraceElement.getFileName() + " " + stackTraceElement.getLineNumber() + " 行 " + format, arguments);
@@ -49,13 +46,13 @@ public class LogUtil {
 
     public static void error(String format, Object... arguments) {
         StackTraceElement stackTraceElement = Thread.currentThread().getStackTrace()[2];
-        if (stackTraceElement.getClassName().equals("GlobalExceptionHandler")){
+        if (stackTraceElement.getClassName().equals("GlobalExceptionHandler")) {
             stackTraceElement = Thread.currentThread().getStackTrace()[3];
         }
         log.error(ErrorLogPix + stackTraceElement.getFileName() + " " + stackTraceElement.getLineNumber() + " 行 " + format, arguments);
     }
 
-    private static void info2(String format, Object... arguments) {
+    public static void info2(String format, Object... arguments) {
         StackTraceElement stackTraceElement = Thread.currentThread().getStackTrace()[3];
         log.info(InfoLogPix + stackTraceElement.getFileName() + " " + stackTraceElement.getLineNumber() + " 行 " + format, arguments);
     }
