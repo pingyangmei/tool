@@ -1505,7 +1505,7 @@ public class Tool {
 
     /* 按优先级取数并排查null */
     public static Object orElse(Object a, Object b) {
-        return Optional.of(a).orElse(b);
+        return Optional.ofNullable(a).orElse(b);
     }
 
     public static void main(String[] args) {
