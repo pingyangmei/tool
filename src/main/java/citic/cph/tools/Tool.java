@@ -1503,6 +1503,11 @@ public class Tool {
         return taMap;
     }
 
+    /* 按优先级取数并排查null */
+    public static Object orElse(Object a, Object b) {
+        return Optional.of(a).orElse(b);
+    }
+
     public static void main(String[] args) {
 
         for (int i = 0; i < 10; i++) {
