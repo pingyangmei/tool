@@ -1,4 +1,4 @@
-package citic.cph.tools;
+package citic.cph.tools.excel.util.poi;
 
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.*;
@@ -129,47 +129,47 @@ public class ExcelPOIUtils {
 					}
 
 					if (field.getType().equals(Date.class)) {
-						if (Cell.CELL_TYPE_STRING == cell.getCellType()) {
+						if (CellType.STRING== cell.getCellType()) {
 							RefelctUtil.setValue(obj, field.getName(), dateFormat.parse(cell.getStringCellValue()));
 						} else {
 							RefelctUtil.setValue(obj, field.getName(), new Date(cell.getDateCellValue().getTime()));
 						}
 					} else if (field.getType().equals(Integer.class)) {
-						if (Cell.CELL_TYPE_NUMERIC == cell.getCellType()) {
+						if (CellType.NUMERIC == cell.getCellType()) {
 							RefelctUtil.setValue(obj, field.getName(), (int) cell.getNumericCellValue());
-						} else if (Cell.CELL_TYPE_STRING == cell.getCellType()) {
+						} else if (CellType.STRING== cell.getCellType()) {
 							RefelctUtil.setValue(obj, field.getName(), Integer.parseInt(cell.getStringCellValue()));
 						}
 					} else if (field.getType().equals(BigDecimal.class)) {
-						if (Cell.CELL_TYPE_NUMERIC == cell.getCellType()) {
+						if (CellType.NUMERIC == cell.getCellType()) {
 							RefelctUtil.setValue(obj, field.getName(), BigDecimal.valueOf(cell.getNumericCellValue()));
-						} else if (Cell.CELL_TYPE_STRING == cell.getCellType()) {
+						} else if (CellType.STRING== cell.getCellType()) {
 							RefelctUtil.setValue(obj, field.getName(), cell.getStringCellValue());
 						}
 					} else if (field.getType().equals(Double.class)) {
-						if (Cell.CELL_TYPE_NUMERIC == cell.getCellType()) {
+						if (CellType.NUMERIC == cell.getCellType()) {
 							if (excelFiled.precision() == 0) {   //没有小数点
 								RefelctUtil.setValue(obj, field.getName(), (double) BigDecimal.valueOf(cell.getNumericCellValue()).intValue());
 							} else {
 								RefelctUtil.setValue(obj, field.getName(), BigDecimal.valueOf(cell.getNumericCellValue()).doubleValue());
 							}
-						} else if (Cell.CELL_TYPE_STRING == cell.getCellType()) {
+						} else if (CellType.STRING== cell.getCellType()) {
 							RefelctUtil.setValue(obj, field.getName(), new Double(cell.getStringCellValue()));
 						}
 					} else if (field.getType().equals(String.class)) {
-						if (Cell.CELL_TYPE_NUMERIC == cell.getCellType()) {
+						if (CellType.NUMERIC == cell.getCellType()) {
 							if (excelFiled.precision() == 0) {   //没有小数点
 								RefelctUtil.setValue(obj, field.getName(), BigDecimal.valueOf(cell.getNumericCellValue()).intValue() + "");
 							} else {
 								RefelctUtil.setValue(obj, field.getName(), BigDecimal.valueOf(cell.getNumericCellValue()).doubleValue() + "");
 							}
-						} else if (Cell.CELL_TYPE_STRING == cell.getCellType()) {
+						} else if (CellType.STRING== cell.getCellType()) {
 							RefelctUtil.setValue(obj, field.getName(), cell.getStringCellValue());
 						}
 					} else {
-						if (Cell.CELL_TYPE_NUMERIC == cell.getCellType()) {
+						if (CellType.NUMERIC == cell.getCellType()) {
 							RefelctUtil.setValue(obj, field.getName(), BigDecimal.valueOf(cell.getNumericCellValue()));
-						} else if (Cell.CELL_TYPE_STRING == cell.getCellType()) {
+						} else if (CellType.STRING== cell.getCellType()) {
 							RefelctUtil.setValue(obj, field.getName(), cell.getStringCellValue());
 						}
 					}

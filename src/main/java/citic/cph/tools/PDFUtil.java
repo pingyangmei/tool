@@ -4,8 +4,13 @@ import com.lowagie.text.Document;
 import com.lowagie.text.pdf.PdfCopy;
 import com.lowagie.text.pdf.PdfImportedPage;
 import com.lowagie.text.pdf.PdfReader;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.pdfbox.io.MemoryUsageSetting;
+import org.apache.pdfbox.io.RandomAccessStreamCache;
 import org.apache.pdfbox.multipdf.PDFMergerUtility;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -62,7 +67,7 @@ public class PDFUtil {
 				try {
 					mergePdf.addSource(f);
 				} catch (FileNotFoundException e) {
-					e.printStackTrace();
+					LogUtil.error(e.getMessage());
 				}
 			}
 		}
@@ -70,9 +75,9 @@ public class PDFUtil {
 		mergePdf.setDestinationFileName(targetPath);
 		// 合并pdf
 		try {
-			mergePdf.mergeDocuments(MemoryUsageSetting.setupMainMemoryOnly());
+			mergePdf.mergeDocuments(null);
 		} catch (IOException e) {
-			e.printStackTrace();
+			LogUtil.error(e.getMessage());
 		}
 		return new File(targetPath);
 	}
@@ -110,13 +115,13 @@ public class PDFUtil {
 
 	public static void main(String[] args) {
 		List<File> files = new ArrayList<>();
-		files.add(new File("E:\\MEI\\Desktop\\电子仓单.pdf"));
-		files.add(new File("E:\\MEI\\Desktop\\电子仓单.pdf"));
-//		files.add(new File("E:\\MEI\\Desktop\\食糖电子仓单.pdf"));
-//		File f = mulFile2One(files, "E:\\MEI\\Desktop\\合并2.pdf");
+		files.add(new File("D:\\MEI-WORK-P14\\Desktop\\授信coe技术立项申请1.pdf"));
+		files.add(new File("D:\\MEI-WORK-P14\\Desktop\\授信coe技术立项申请2.pdf"));
+		File f = mulFile2One(files, "D:\\MEI-WORK-P14\\Desktop\\合并2.pdf");
+
 //		System.out.println(f.length());
 
-		String inputFile = "E:\\MEI\\Desktop\\仓单模板 - 副本.docx";
-		String outputFile = "E:\\MEI\\Desktop\\转pdf.pdf";
+//		String inputFile = "E:\\MEI\\Desktop\\仓单模板 - 副本.docx";
+//		String outputFile = "E:\\MEI\\Desktop\\转pdf.pdf";
 	}
 }

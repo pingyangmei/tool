@@ -1,9 +1,9 @@
-package citic.cph.tools;
+package citic.cph.tools.excel.util.poi;
 
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
+import citic.cph.tools.BizException;
+import citic.cph.tools.LogUtil;
+import citic.cph.tools.Tool;
+import org.apache.poi.ss.usermodel.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
@@ -23,17 +23,17 @@ public class ExcelUtil {
 
 	private static String getStringValue(Cell cell) {
 		String s = null;
-		if (cell.getCellType() == Cell.CELL_TYPE_NUMERIC) {
+		if (cell.getCellType() == CellType.NUMERIC) {
 			long longVal = Math.round(cell.getNumericCellValue());
 			double doubleVal = cell.getNumericCellValue();
 			if (Double.parseDouble(longVal + ".0") == doubleVal) {
-				cell.setCellType(Cell.CELL_TYPE_STRING);
+				cell.setCellType(CellType.STRING);
 			}
 			s = cell.getStringCellValue();
 		}
-		if (Cell.CELL_TYPE_NUMERIC == cell.getCellType()) {
+		if (CellType.NUMERIC == cell.getCellType()) {
 			s = String.valueOf(cell.getNumericCellValue());
-		} else if (Cell.CELL_TYPE_STRING == cell.getCellType()) {
+		} else if (CellType.STRING == cell.getCellType()) {
 			s = cell.getStringCellValue();
 		}
 		if ("".equals(s) || s == null) {
