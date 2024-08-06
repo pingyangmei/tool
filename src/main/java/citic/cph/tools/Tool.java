@@ -1,13 +1,11 @@
 package citic.cph.tools;
 
 import com.alibaba.fastjson.JSONObject;
-import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.json.JsonReadFeature;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.util.JSONPObject;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
@@ -145,6 +143,13 @@ public class Tool {
      */
     public static String getRMIClientIP() throws ServerNotActiveException {
         return RemoteServer.getClientHost();
+    }
+
+    public static String getIP() {
+        String ipURL = "https://api.ipify.org/?format=json";
+        HttpUtil httpUtil = new HttpUtil();
+        String res = httpUtil.getHttp(ipURL, "", "", "");
+        return JSONObject.parseObject(res).getString("ip");
     }
 
     /**
