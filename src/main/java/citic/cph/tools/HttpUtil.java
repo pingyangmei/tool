@@ -1,12 +1,13 @@
 package citic.cph.tools;
 
-import citic.cph.tools.param.tuple.Tuple2;
+import lombok.SneakyThrows;
 import okhttp3.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.net.ssl.*;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
@@ -102,6 +103,27 @@ public class HttpUtil {
         return dealRequest(request, SERVICE_NAME, method, req);
     }
 
+    /**
+     * (适用于请求url = baseURL+method 的情况)
+     *
+     * @param url          服务地址
+     * @param SERVICE_NAME 服务名称
+     * @param method       方法
+     * @param req          请求参数
+     * @return
+     */
+    public /*static*/ String getHttpWithHeaders(String url, String SERVICE_NAME, String method, String req, List<Tuple2<String, String>> headersList) {
+        Headers.Builder builder = new Headers.Builder();
+        headersList.forEach(i -> builder.add(i.a, i.b));
+        Headers headers = builder.build();
+        Request request = new Request.Builder()
+                .url(url + method + req)
+                .get()
+                .headers(headers)
+                .build();
+        return dealRequest(request, SERVICE_NAME, method, req);
+    }
+
 
     /**
      * (适用于请求url = baseURL+method 的情况)
@@ -112,20 +134,67 @@ public class HttpUtil {
      * @param req          请求参数
      * @return
      */
-    public /*static*/ String postJson(String url, String SERVICE_NAME, String method, Object req,List<Tuple2<String, String>> headersList) {
+    public /*static*/ String postJson(String url, String SERVICE_NAME, String method, Object req, List<Tuple2<String, String>> headersList) {
         String reqStr = Tool.opj2Str(req);
-        MediaType mt = MediaType.parse("application/json; charset=utf-8");
-        RequestBody requestBody = RequestBody.create(mt, reqStr);
-        Headers.Builder builder = new Headers.Builder();
-        headersList.forEach(i -> builder.add(i.a, i.b));
-        Headers headers = builder.build();
-
-        Request request = new Request.Builder()
-                .url(url + method)
-                .post(requestBody)
-                .headers(headers)
-                .build();
+        Request.Builder requestBuilder = new Request.Builder();
+        requestBuilder.url(url + method);
+        /*请求头处理*/
+        if (!Tool.isBlankOrNull(headersList)) {
+            Headers.Builder headBuilder = new Headers.Builder();
+            headersList.forEach(i -> headBuilder.add(i.a, i.b));
+            Headers headers = headBuilder.build();
+            LogUtil.info("postForm请求头:{}", headers.toString());
+            requestBuilder.headers(headers);
+        }
+        if (!Tool.isBlankOrNull(reqStr)) {
+            MediaType mediaType = MediaType.parse("application/json");
+            RequestBody requestBody = RequestBody.Companion.create(reqStr, mediaType);
+            LogUtil.info("postForm请求参数:{}", requestBody.toString());
+            requestBuilder.post(requestBody);
+        }
+        Request request = requestBuilder.build();
         return dealRequest(request, SERVICE_NAME, method, reqStr);
+    }
+
+
+    /**
+     * (适用于请求url = baseURL+method 的情况)
+     *
+     * @param url          服务地址
+     * @param SERVICE_NAME 服务名称
+     * @param method       方法
+     * @param req          请求参数
+     * @return
+     */
+    @SneakyThrows
+    public /*static*/ String postForm(String url, String SERVICE_NAME, String method, Object req, List<Tuple2<String, String>> headersList) {
+
+        Request.Builder requestBuilder = new Request.Builder();
+        requestBuilder.url(url + method);
+        /*请求头处理*/
+        if (!Tool.isBlankOrNull(headersList)) {
+            Headers.Builder headBuilder = new Headers.Builder();
+            headersList.forEach(i -> headBuilder.add(i.a, i.b));
+            Headers headers = headBuilder.build();
+            LogUtil.info("postForm请求头:{}", headers.toString());
+            requestBuilder.headers(headers);
+        }
+        MultipartBody.Builder builder = new MultipartBody.Builder();
+        builder.setType(MultipartBody.FORM);
+        for (Field field : req.getClass().getDeclaredFields()) {
+            field.setAccessible(true);
+            String key = field.getName();
+            String value = Tool.opj2Str(field.get(req));
+            if (Tool.isBlankOrNull(value)) {
+                continue;
+            }
+            builder.addFormDataPart(key, value);
+        }
+        RequestBody requestBody = builder.build();
+        LogUtil.info("postForm请求参数:{}", requestBody.toString());
+        requestBuilder.post(requestBody);
+        Request request = requestBuilder.build();
+        return dealRequest(request, SERVICE_NAME, method, requestBody.toString());
     }
 
 
