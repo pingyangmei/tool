@@ -156,14 +156,14 @@
     <distributionManagement>
         <!-- 这里写的就是你想上传的仓库，一般都是写一个第三方仓库 -->
         <repository>
-            <id>releases</id>
+            <id>nexus-releases</id>
             <name>Nexus Release Repository</name>
             <url>
                 http://39.106.33.20:8081/repository/maven-releases/
             </url>
         </repository>
         <snapshotRepository>
-            <id>snapshots</id>
+            <id>nexus-snapshots</id>
             <name>Nexus Snapshots Repository</name>
             <url>
                 http://39.106.33.20:8081/repository/maven-snapshots/

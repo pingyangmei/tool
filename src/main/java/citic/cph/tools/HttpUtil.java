@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.net.ssl.*;
+import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.security.SecureRandom;
@@ -149,7 +150,7 @@ public class HttpUtil {
         if (!Tool.isBlankOrNull(reqStr)) {
             MediaType mediaType = MediaType.parse("application/json");
             RequestBody requestBody = RequestBody.Companion.create(reqStr, mediaType);
-            LogUtil.info("postForm请求参数:{}", requestBody.toString());
+            LogUtil.info("postForm请求参数:{}", reqStr);
             requestBuilder.post(requestBody);
         }
         Request request = requestBuilder.build();
@@ -185,13 +186,20 @@ public class HttpUtil {
             field.setAccessible(true);
             String key = field.getName();
             String value = Tool.opj2Str(field.get(req));
-            if (Tool.isBlankOrNull(value)) {
-                continue;
+            if (field.getType().equals(File.class)) {
+                File file = (File) field.get(req);
+                if (file != null) {
+                    builder.addFormDataPart(key, file.getName(), RequestBody.create(MediaType.parse("application/octet-stream"), file));
+                }
+            } else {
+                if (Tool.isBlankOrNull(value)) {
+                    continue;
+                }
+                builder.addFormDataPart(key, value);
             }
-            builder.addFormDataPart(key, value);
+            LogUtil.info("postForm请求参数:{}：{}", key, value);
         }
         RequestBody requestBody = builder.build();
-        LogUtil.info("postForm请求参数:{}", requestBody.toString());
         requestBuilder.post(requestBody);
         Request request = requestBuilder.build();
         return dealRequest(request, SERVICE_NAME, method, requestBody.toString());
